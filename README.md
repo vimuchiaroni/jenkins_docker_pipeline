@@ -4,7 +4,7 @@ This project is intended to deploy a docker api to a docker host.
 
 ## Pipeline variables that need to be set in the Jenkins file
 
- '''
+ """
   environment {
     registry = "<DOCKER_REGISTRY>"
     registryCredential = ">JENKINS_REGISTRY_CREDENTIAL>"
@@ -15,4 +15,4 @@ This project is intended to deploy a docker api to a docker host.
     apiPort=<API_PORT>
     gitCredential="<JENKINS_GIT_CREDENTIAL"
   }
-'''
+"""
