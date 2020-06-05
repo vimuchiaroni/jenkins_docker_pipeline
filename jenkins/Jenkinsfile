@@ -1,0 +1,83 @@
+pipeline {
+  environment {
+    registry = "vimuchiaroni/globo-api"
+    registryCredential = "dockerhub"
+    dockerImage = ''
+    dockerHost="tcp://192.168.0.233:2375"
+    containerName = "globo-api"
+    apiUrl= "globo-api.globo.com"
+    apiPort=8000
+    monitoring="vimuchiaroni/graphite"
+    monitoringName="graphite"
+    graphiteServer='192.168.0.233'
+  }
+  agent any
+  stages {
+    stage('Cloning Git') {
+      steps {
+        git url: 'https://github.com/SelecaoGlobocom/victor-muchiaroni', 
+        credentialsId: 'github'
+      }
+    }
+    stage('Building image') {
+      steps{
+        script {
+        withDockerServer([uri: "${dockerHost}"]) {
+
+         dockerImage = docker.build registry + ":$BUILD_NUMBER"
+        }
+        }
+      }
+    }
+    stage('Push Image') {
+      steps{
+        script {
+            withDockerServer([uri: "${dockerHost}"]) {
+            docker.withRegistry( '', registryCredential ) {
+            dockerImage.push()
+            }
+          }
+        }
+      }
+    }
+
+    stage('Stopping old application versions') {
+      steps{
+         script{
+            sh "docker -H ${dockerHost} stop ${containerName} || true"
+            sh "docker -H ${dockerHost} stop ${monitoringName} || true"
+
+            }
+          }
+         }
+    stage('Deploy Monitoring service image') {
+      steps{
+         script{
+            def monitoringImage = docker.image("${monitoring}")
+            docker.withServer('tcp://192.168.0.233:2375'){
+            monitoringImage.run('--rm -p 8090:80  -p 2003-2004:2003-2004  -p 2023-2024:2023-2024  -p 8125:8125/udp  -p 8126:8126 --name ' + monitoringName) 
+
+            }
+         }
+      }
+   }
+
+    stage('Deploy docker image') {
+      steps{
+         script{
+            docker.withServer("${dockerHost}"){
+            dockerImage.run('-p 8000:8000 -e GRAPHITE_SERVER=${graphiteServer} --rm --name ' + containerName) 
+            
+         }
+      }
+   }
+  }
+    stage('Smoke test') {
+      steps{
+         script{
+            sh "sleep 30; curl ${apiUrl}:${apiPort}"
+        }       
+      }
+   }
+  }
+}

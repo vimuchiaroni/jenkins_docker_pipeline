@@ -1,0 +1,53 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: jenkins-victorvol
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/data/jenkins"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: jenkins-victorvol-claim
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-victor
+  labels:
+    app: jenkins-victor
+spec:
+  selector:
+    matchLabels:
+      app: jenkins-victor
+  template:
+    metadata:
+      labels:
+        app: jenkins-victor
+    spec:
+      containers:
+      - image: vimuchiaroni/jenkins:latest
+        name: jenkins-victor
+        ports:
+        - containerPort: 8080
+          name: jenkins-victor
+        volumeMounts:
+        - name: jenkins-victorvol
+          mountPath: /var/jenkins_home
+      volumes:
+      - name: jenkins-victorvol
+        persistentVolumeClaim:
+          claimName: jenkins-victorvol-claim
+
