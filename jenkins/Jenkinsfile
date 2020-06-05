@@ -1,22 +1,20 @@
 pipeline {
   environment {
-    registry = "vimuchiaroni/globo-api"
-    registryCredential = "dockerhub"
+    registry = ""
+    registryCredential = ""
     dockerImage = ''
-    dockerHost="tcp://192.168.0.233:2375"
-    containerName = "globo-api"
-    apiUrl= "globo-api.globo.com"
-    apiPort=8000
-    monitoring="vimuchiaroni/graphite"
-    monitoringName="graphite"
-    graphiteServer='192.168.0.233'
+    dockerHost=""
+    containerName = ""
+    apiUrl= ""
+    apiPort=
+    gitCredential="<JENKINS_GIT_CREDENTIAL>"
   }
   agent any
   stages {
     stage('Cloning Git') {
       steps {
         git url: 'https://github.com/SelecaoGlobocom/victor-muchiaroni', 
-        credentialsId: 'github'
+        credentialsId: gitCredential
       }
     }
     stage('Building image') {
@@ -45,23 +43,10 @@ pipeline {
       steps{
          script{
             sh "docker -H ${dockerHost} stop ${containerName} || true"
-            sh "docker -H ${dockerHost} stop ${monitoringName} || true"
 
             }
           }
          }
-    stage('Deploy Monitoring service image') {
-      steps{
-         script{
-            def monitoringImage = docker.image("${monitoring}")
-            docker.withServer('tcp://192.168.0.233:2375'){
-            monitoringImage.run('--rm -p 8090:80  -p 2003-2004:2003-2004  -p 2023-2024:2023-2024  -p 8125:8125/udp  -p 8126:8126 --name ' + monitoringName) 
-
-            }
-         }
-      }
-   }
-
     stage('Deploy docker image') {
       steps{
          script{
