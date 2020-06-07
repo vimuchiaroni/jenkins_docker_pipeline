@@ -13,7 +13,7 @@ pipeline {
   stages {
     stage('Cloning Git') {
       steps {
-        git url: 'https://github.com/SelecaoGlobocom/victor-muchiaroni', 
+        git url: 'https://github.com/vimuchiaroni/desafio_ci_cd', 
         credentialsId: gitCredential
       }
     }
