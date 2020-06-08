@@ -13,6 +13,6 @@ This project is intended to deploy a docker api to a docker host.
     containerName = "CONTAINER_NAME_RUN"
     apiUrl= "<API_URL>"
     apiPort=<API_PORT>
-    gitCredential="<JENKINS_GIT_CREDENTIAL"
+    gitCredential="<JENKINS_GIT_CREDENTIAL>"
   }
 ```
