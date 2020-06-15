@@ -1,6 +1,6 @@
 # Deploy a docker application to a dockerHost
 
-This project is intended to deploy a docker api to a docker host.
+This project is intended to deploy a docker api application to a docker host.
 
 ## Pipeline variables that need to be set in the Jenkins file
 
